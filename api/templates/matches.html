@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cricket Market Load</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Important for mobile -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        .match-card { 
+            border:1px solid #ccc; 
+            border-radius:12px; 
+            padding:15px; 
+            margin-bottom:25px; 
+            background: linear-gradient(135deg, #f8f9fa, #eef2f3);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease-in-out;
+        }
+        .match-card:hover {
+            transform: scale(1.01);
+        }
+        .team-info img { 
+            width:40px; 
+            height:40px; 
+            border-radius:50%; 
+            margin-right:10px; 
+            border:2px solid #ddd;
+        }
+        .team-name {
+            font-size:1.15rem;
+            font-weight:700;
+            color:#0d6efd;
+        }
+        .bet-box { 
+            background:#fff; 
+            border:1px solid #ccc; 
+            border-radius:8px; 
+            padding:12px; 
+            margin-top:12px; 
+        }
+        .heading { 
+            font-weight:bold; 
+            margin-bottom:8px; 
+            color:#0d6efd; 
+        }
+        .bet-amount { 
+            font-weight:bold; 
+            font-size:1rem;
+        }
+        .percent { 
+            font-size:0.9rem; 
+            margin-left:5px; 
+        }
+        .high { color:#d9534f; } /* red */
+        .low { color:#28a745; }  /* green */
+
+        /* Branding */
+        .branding {
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #6c757d;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 576px) {
+            .team-name { font-size:1rem; }
+            .bet-amount { font-size:0.95rem; }
+            .percent { font-size:0.85rem; }
+            .heading { font-size:1rem; }
+            .branding { font-size: 0.8rem; left: 10px; top: 8px; }
+        }
+    </style>
+</head>
+<body class="container my-4">
+
+    <!-- Branding -->
+    <div class="branding">Powered by Punisher24</div><br>
+
+    <h1 class="mb-4 text-center text-primary">Live Cricket Load</h1>
+
+    {% for match in matches %}
+    <div class="match-card">
+        <h4 class="text-dark">{{ match.matchname }}</h4>
+        <small class="text-secondary d-block mb-2">
+            {{ match.matchnamename }} | 
+            <span class="badge bg-info text-dark">Status: {{ match.livemsg }}</span>
+        </small>
+
+        <div class="row mt-3">
+            <div class="col-12 col-md-6 d-flex align-items-center team-info mb-2 mb-md-0">
+                <img src="https://imgs.search.brave.com/_3-klxnNRvtFVU6fHN3IqfrJBcODX_d5kspgRDaasJM/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4u/c2hvcGlmeS5jb20v/cy9maWxlcy8xLzAy/NzkvNjM5OC8xOTYx/L2ZpbGVzL3B1bmlz/aGVyX2xvZ29fYmxh/bmNfc3VyX2ZvbmRf/bm9pcl8wZWY4OGQx/NC0yOTJjLTRmYTkt/YjgzYi03ZDFiZmRj/NDg5YzlfNDgweDQ4/MC5qcGc_dj0xNzA0/OTg5MTg2" alt="team1">
+                <span class="team-name">{{ match.team1name }}</span>
+            </div>
+            <div class="col-12 col-md-6 d-flex align-items-center team-info">
+                <img src="https://imgs.search.brave.com/_3-klxnNRvtFVU6fHN3IqfrJBcODX_d5kspgRDaasJM/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4u/c2hvcGlmeS5jb20v/cy9maWxlcy8xLzAy/NzkvNjM5OC8xOTYx/L2ZpbGVzL3B1bmlz/aGVyX2xvZ29fYmxh/bmNfc3VyX2ZvbmRf/bm9pcl8wZWY4OGQx/NC0yOTJjLTRmYTkt/YjgzYi03ZDFiZmRj/NDg5YzlfNDgweDQ4/MC5qcGc_dj0xNzA0/OTg5MTg2" alt="team2">
+                <span class="team-name">{{ match.team2name }}</span>
+            </div>
+        </div>
+
+        <!-- Match Bet Amount -->
+        <div class="bet-box">
+            <div class="heading">Match Win Bets</div>
+            <div class="row">
+                <div class="col-12 col-md-6 mb-2 mb-md-0">
+                    {% if match.team1_match_pct >= match.team2_match_pct %}
+                        <span class="bet-amount high">{{ "{:,}".format(match.noteam1 | int) }}</span>
+                        <span class="percent high">({{ match.team1_match_pct }}%)</span>
+                    {% else %}
+                        <span class="bet-amount low">{{ "{:,}".format(match.noteam1 | int) }}</span>
+                        <span class="percent low">({{ match.team1_match_pct }}%)</span>
+                    {% endif %}
+                    — {{ match.team1name }}
+                </div>
+                <div class="col-12 col-md-6">
+                    {% if match.team2_match_pct >= match.team1_match_pct %}
+                        <span class="bet-amount high">{{ "{:,}".format(match.noteam2 | int) }}</span>
+                        <span class="percent high">({{ match.team2_match_pct }}%)</span>
+                    {% else %}
+                        <span class="bet-amount low">{{ "{:,}".format(match.noteam2 | int) }}</span>
+                        <span class="percent low">({{ match.team2_match_pct }}%)</span>
+                    {% endif %}
+                    — {{ match.team2name }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Toss Bet Amount -->
+        <div class="bet-box">
+            <div class="heading">Toss Bets</div>
+            <div class="row">
+                <div class="col-12 col-md-6 mb-2 mb-md-0">
+                    {% if match.team1_toss_pct >= match.team2_toss_pct %}
+                        <span class="bet-amount high">{{ "{:,}".format(match.toss1 | int) }}</span>
+                        <span class="percent high">({{ match.team1_toss_pct }}%)</span>
+                    {% else %}
+                        <span class="bet-amount low">{{ "{:,}".format(match.toss1 | int) }}</span>
+                        <span class="percent low">({{ match.team1_toss_pct }}%)</span>
+                    {% endif %}
+                    — {{ match.team1name }}
+                </div>
+                <div class="col-12 col-md-6">
+                    {% if match.team2_toss_pct >= match.team1_toss_pct %}
+                        <span class="bet-amount high">{{ "{:,}".format(match.toss2 | int) }}</span>
+                        <span class="percent high">({{ match.team2_toss_pct }}%)</span>
+                    {% else %}
+                        <span class="bet-amount low">{{ "{:,}".format(match.toss2 | int) }}</span>
+                        <span class="percent low">({{ match.team2_toss_pct }}%)</span>
+                    {% endif %}
+                    — {{ match.team2name }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Pagination Controls -->
+    <div class="d-flex justify-content-between mt-4">
+        {% if page > 1 %}
+        <a class="btn btn-outline-primary px-4" href="/?page={{ page - 1 }}">← Previous</a>
+        {% else %}
+        <span></span>
+        {% endif %}
+        <a class="btn btn-outline-primary px-4" href="/?page={{ page + 1 }}">Next →</a>
+    </div>
+
+</body>
+</html>
