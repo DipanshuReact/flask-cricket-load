@@ -1,8 +1,14 @@
 from flask import Flask, render_template, request
 import requests
-import json
 
 app = Flask(__name__)
+
+# --- safe integer conversion ---
+def safe_int(value):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
 
 @app.route('/')
 def show_load():
@@ -22,18 +28,18 @@ def show_load():
     response = requests.get(url, headers=headers)
     data = response.json()  # direct JSON parsing
 
-    # --- calculate percentages as before ---
+    # --- calculate percentages with safe conversion ---
     for match in data:
         # Match bets
-        team1_bet = int(match.get("noteam1", 0) or 0)
-        team2_bet = int(match.get("noteam2", 0) or 0)
+        team1_bet = safe_int(match.get("noteam1", 0))
+        team2_bet = safe_int(match.get("noteam2", 0))
         total_match_bet = team1_bet + team2_bet
         match["team1_match_pct"] = round(team1_bet / total_match_bet * 100, 2) if total_match_bet else 0
         match["team2_match_pct"] = round(team2_bet / total_match_bet * 100, 2) if total_match_bet else 0
 
         # Toss bets
-        toss1_bet = int(match.get("toss1", 0) or 0)
-        toss2_bet = int(match.get("toss2", 0) or 0)
+        toss1_bet = safe_int(match.get("toss1", 0))
+        toss2_bet = safe_int(match.get("toss2", 0))
         total_toss_bet = toss1_bet + toss2_bet
         match["team1_toss_pct"] = round(toss1_bet / total_toss_bet * 100, 2) if total_toss_bet else 0
         match["team2_toss_pct"] = round(toss2_bet / total_toss_bet * 100, 2) if total_toss_bet else 0
