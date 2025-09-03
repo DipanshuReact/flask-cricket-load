@@ -52,31 +52,35 @@
         }
         .high { color:#d9534f; } /* red */
         .low { color:#28a745; }  /* green */
-
-        /* Branding */
         .branding {
-            position: absolute;
-            top: 10px;
-            left: 15px;
             font-size: 0.9rem;
             font-weight: 600;
             color: #6c757d;
         }
-
-        /* Mobile responsiveness */
+        .telegram-link {
+            text-decoration: none;
+            color: inherit;
+        }
+        .telegram-link:hover {
+            background-color: #f1f1f1;
+            border-radius: 8px;
+        }
         @media (max-width: 576px) {
             .team-name { font-size:1rem; }
             .bet-amount { font-size:0.95rem; }
             .percent { font-size:0.85rem; }
             .heading { font-size:1rem; }
-            .branding { font-size: 0.8rem; left: 10px; top: 8px; }
+            .branding { font-size: 0.8rem; }
         }
     </style>
 </head>
 <body class="container my-4">
 
-    <!-- Branding -->
-    <div class="branding">Powered by Punisher24</div><br>
+    <!-- Header with Branding and Logout Button -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="branding">Powered by Punisher24</div>
+        <!-- <a href="/logout" class="btn btn-danger btn-sm">Logout</a> -->
+    </div>
 
     <h1 class="mb-4 text-center text-primary">Live Cricket Load</h1>
 
@@ -99,7 +103,6 @@
             </div>
         </div>
 
-        <!-- Match Bet Amount -->
         <div class="bet-box">
             <div class="heading">Match Win Bets</div>
             <div class="row">
@@ -126,7 +129,6 @@
             </div>
         </div>
 
-        <!-- Toss Bet Amount -->
         <div class="bet-box">
             <div class="heading">Toss Bets</div>
             <div class="row">
@@ -152,10 +154,16 @@
                 </div>
             </div>
         </div>
+
+        <!-- Telegram Branding Section -->
+        <a href="https://t.me/yourchannel" target="_blank" class="telegram-link d-flex align-items-center mt-3 p-2 border rounded bg-white">
+            <img src="https://img.icons8.com/?size=96&id=EWzVSK2hyV9H&format=png" 
+                 alt="Telegram" style="width:28px;height:28px;margin-right:8px;">
+            <span class="branding">Join our Telegram Channel</span>
+        </a>
     </div>
     {% endfor %}
 
-    <!-- Pagination Controls -->
     <div class="d-flex justify-content-between mt-4">
         {% if page > 1 %}
         <a class="btn btn-outline-primary px-4" href="/?page={{ page - 1 }}">← Previous</a>
@@ -163,21 +171,6 @@
         <span></span>
         {% endif %}
         <a class="btn btn-outline-primary px-4" href="/?page={{ page + 1 }}">Next →</a>
-    </div>
-
-    <!-- Page View and Unique Visitor Counters -->
-    <div class="text-center mt-5">
-        <!-- Page View Counter -->
-        <a href="https://www.hitwebcounter.com" target="_blank">
-            <img src="https://hitwebcounter.com/counter/counter.php?page=21436303&style=0001&nbdigits=6&type=page&initCount=0" 
-                 title="Page views" alt="Web counter" border="0" />
-        </a>
-        <br>
-        <!-- Unique Visitor Counter -->
-        <a href="https://www.hitwebcounter.com" target="_blank">
-            <img src="https://hitwebcounter.com/counter/counter.php?page=21436304&style=0001&nbdigits=6&type=ip&initCount=0" 
-                 title="Unique visitors" alt="Unique visitor counter" border="0" />
-        </a>
     </div>
 
 </body>
