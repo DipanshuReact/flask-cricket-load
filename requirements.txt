@@ -1,2 +1,6 @@
 flask
+flask-bcrypt
+supabase
+python-dotenv
 requests
+python-dateutil

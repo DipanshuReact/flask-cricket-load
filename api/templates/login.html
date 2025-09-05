@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      position: relative;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #000; /* fallback */
+      overflow: hidden;
+    }
+
+    /* Background image */
+    .bg-img {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;  /* fill screen with no gaps */
+      filter: blur(2px);
+      z-index: -1;
+    }
+
+    /* Swap background image for mobile */
+    @media (max-width: 576px) {
+      .bg-img {
+        content: url("https://i.postimg.cc/CLJ9fKPp/Whats-App-Image-2025-09-05-at-23-13-16-eef301b9.jpg");
+      }
+    }
+
+    .login-container {
+      max-width: 400px;
+      width: 100%;
+      margin: auto;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      backdrop-filter: blur(4px);
+    }
+
+    .heading {
+      text-align: center;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #0d6efd;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4); /* shadow effect */
+    }
+
+    .telegram-contact {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 20px;
+      gap: 10px;
+      font-size: 0.95rem;
+    }
+
+    .telegram-contact img {
+      width: 28px;
+      height: 28px;
+    }
+
+    @media (max-width: 576px) {
+      .login-container {
+        padding: 20px;
+        margin: 20px;
+      }
+    }
+  </style>
+</head>
+<body class="d-flex flex-column justify-content-center align-items-center min-vh-100">
+
+  <!-- Background image -->
+  <img src="https://i.postimg.cc/SQg4FV6h/Screenshot-2025-09-05-224758.png" class="bg-img" alt="Background">
+
+  <!-- Heading -->
+  <div class="heading">Live Cricket Load</div>
+
+  <!-- Login Form -->
+  <div class="login-container">
+    <h2 class="mb-4 text-center">Login</h2>
+    <form method="POST">
+      <div class="mb-3">
+        <label>Email</label>
+        <input name="email" type="email" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label>Password</label>
+        <input name="password" type="password" class="form-control" required>
+      </div>
+      <button class="btn btn-primary w-100">Login</button>
+    </form>
+
+    <!-- Telegram Contact Section -->
+    <div class="telegram-contact">
+      <span>For Email & Pass or any issues contact:</span>
+      <a href="https://t.me/+AXhXFbIge2NmNTJl" target="_blank">
+        <img src="https://img.icons8.com/?size=96&id=EWzVSK2hyV9H&format=png" alt="Telegram">
+      </a>
+    </div>
+  </div>
+
+</body>
+</html>
