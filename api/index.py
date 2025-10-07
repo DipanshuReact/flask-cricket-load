@@ -32,11 +32,11 @@ def login():
 
         res = supabase.table("user_sessions").select("*").eq("email", email).execute()
         if not res.data:
-            return "Banned by CricVox voilating rules!", 401
+            return "Invalid email or password!", 401
         
         user = res.data[0]
         if password != user["password"]:
-            return "Banned by CricVox voilating rules!", 401
+            return "Invalid email or password!", 401
 
         token = secrets.token_hex(32)
         expires_at = datetime.datetime.utcnow() + datetime.timedelta(hours=24)
