@@ -4,26 +4,48 @@ load_dotenv()
 from flask import Flask, render_template, request, redirect, make_response
 from supabase import create_client
 from flask_bcrypt import Bcrypt
-import os, secrets, datetime, requests
+import os, secrets, datetime, requests, json
 from dateutil import parser
+from functools import wraps
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 
-# Supabase client setup
+# ======================
+# SUPABASE SETUP
+# ======================
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-
 app.secret_key = os.getenv("SECRET_KEY", "fallback_secret_key")
 
+
+# ======================
+# HELPER FUNCTIONS
+# ======================
 def safe_int(value):
     try:
         return int(value)
     except (TypeError, ValueError):
         return 0
 
+
+def parse_json_response(response):
+    """Safely parse JSON or return [] on failure."""
+    if not response.text.strip():
+        print("⚠️ Empty API response (no data).")
+        return []
+    try:
+        return response.json()
+    except json.JSONDecodeError:
+        print("⚠️ Invalid JSON response (showing first 300 chars):")
+        print(response.text[:300])
+        return []
+
+
+# ======================
 # LOGIN PAGE
+# ======================
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -52,7 +74,12 @@ def login():
 
     return render_template("login.html")
 
+
+# ======================
+# LOGIN REQUIRED DECORATOR
+# ======================
 def require_login(func):
+    @wraps(func)
     def wrapper(*args, **kwargs):
         token = request.cookies.get("auth_token")
         if not token:
@@ -63,7 +90,7 @@ def require_login(func):
             return redirect("/login")
 
         user = res.data[0]
-        if not user["expires_at"]:
+        if not user.get("expires_at"):
             return redirect("/login")
         
         expires_at = parser.isoparse(user["expires_at"])
@@ -72,30 +99,34 @@ def require_login(func):
             return redirect("/login")
 
         return func(*args, **kwargs)
-    wrapper.__name__ = func.__name__
     return wrapper
 
+
+# ======================
+# MAIN PAGE — USES NEW API
+# ======================
 @app.route("/")
 @require_login
 def show_load():
     page = request.args.get('page', default=1, type=int)
     limit = 10
-    url = f"http://cricketprofile.in/opgopalbhati/Jdieodapi_cricketprofile/index.php/User_app/getallmatch?page={page}&limit={limit}"
+    url = f"http://cricketprofile.in/cricvox/2026V1/index.php/User_app/getallmatch?page={page}&limit={limit}"
     headers = {
-        'User-Agent': "okhttp/3.4.1",
+        'User-Agent': "okhttp/4.9.3",
         'Connection': "Keep-Alive",
         'Accept-Encoding': "gzip",
         'Auth': "MIIDaDCCAlCgAwIBAgIFAMARsOYwDQYJKoZIhvcNAQEBQAwTjEqMCgGCSqGSIb3"
     }
 
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
-        data = response.json()
+        data = parse_json_response(response)
     except Exception as e:
         print("API error:", e)
         data = []
 
+    # Calculate betting percentages safely
     for match in data:
         team1_bet = safe_int(match.get("noteam1", 0))
         team2_bet = safe_int(match.get("noteam2", 0))
@@ -111,6 +142,10 @@ def show_load():
 
     return render_template("matches.html", matches=data, page=page)
 
+
+# ======================
+# LOGOUT
+# ======================
 @app.route("/logout")
 def logout():
     token = request.cookies.get("auth_token")
@@ -124,3 +159,9 @@ def logout():
     resp.delete_cookie("auth_token")
     return resp
 
+
+# ======================
+# MAIN ENTRY
+# ======================
+if __name__ == "__main__":
+    app.run(debug=True)
