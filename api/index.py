@@ -4,21 +4,26 @@ load_dotenv()
 from flask import Flask, render_template, request, redirect, make_response
 from supabase import create_client
 from flask_bcrypt import Bcrypt
-import os, secrets, datetime, requests, json
+import os, secrets, datetime, requests, json, hashlib
 from dateutil import parser
 from functools import wraps
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import unpad
+import base64
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 
 # ======================
-# SUPABASE SETUP
+# SUPABASE & CRYPTO SETUP
 # ======================
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 app.secret_key = os.getenv("SECRET_KEY", "fallback_secret_key")
 
+# The secret key we extracted from the APK
+DECRYPTION_PASSWORD = "b7Q!eF9rL2#Z8xV6wT1@pC4dJ5hM0nR3"
 
 # ======================
 # HELPER FUNCTIONS
@@ -29,19 +34,44 @@ def safe_int(value):
     except (TypeError, ValueError):
         return 0
 
+def decrypt_payload(encrypted_str):
+    """Decrypts the AES-CBC payload returned by the cricket API."""
+    try:
+        # 1. Derive the 32-byte key using SHA-256
+        key = hashlib.sha256(DECRYPTION_PASSWORD.encode('utf-8')).digest()
+        
+        # 2. Decode Base64
+        raw_bytes = base64.b64decode(encrypted_str)
+        
+        # 3. Extract IV (first 16 bytes) and Ciphertext
+        iv = raw_bytes[:16]
+        ciphertext = raw_bytes[16:]
+        
+        # 4. Decrypt using AES-CBC
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        decrypted_raw = cipher.decrypt(ciphertext)
+        
+        # 5. Remove Padding and return as List/Dict
+        decrypted_data = unpad(decrypted_raw, AES.block_size)
+        return json.loads(decrypted_data.decode('utf-8'))
+    except Exception as e:
+        print(f"❌ Decryption failed: {e}")
+        return []
 
 def parse_json_response(response):
-    """Safely parse JSON or return [] on failure."""
-    if not response.text.strip():
-        print("⚠️ Empty API response (no data).")
-        return []
+    """Parses the outer JSON, then decrypts the 'payload' field."""
     try:
-        return response.json()
-    except json.JSONDecodeError:
-        print("⚠️ Invalid JSON response (showing first 300 chars):")
-        print(response.text[:300])
+        outer_data = response.json()
+        encrypted_payload = outer_data.get("payload")
+        
+        if encrypted_payload:
+            return decrypt_payload(encrypted_payload)
+        
+        # Fallback if the API returns a direct list (unlikely now)
+        return outer_data if isinstance(outer_data, list) else []
+    except Exception as e:
+        print(f"⚠️ Response Error: {e}")
         return []
-
 
 # ======================
 # LOGIN PAGE
@@ -74,7 +104,6 @@ def login():
 
     return render_template("login.html")
 
-
 # ======================
 # LOGIN REQUIRED DECORATOR
 # ======================
@@ -101,16 +130,16 @@ def require_login(func):
         return func(*args, **kwargs)
     return wrapper
 
-
 # ======================
-# MAIN PAGE — USES NEW API
+# MAIN PAGE — DECRYPTS API DATA
 # ======================
 @app.route("/")
 @require_login
 def show_load():
     page = request.args.get('page', default=1, type=int)
     limit = 10
-    url = f"http://cricketprofile.in/cricvox/2026V1/index.php/User_app/getallmatch?page={page}&limit={limit}"
+    url = f"http://cricketprofile.in/cricvoxencdec/2026V1/index.php/User_app/getallmatch?page={page}&limit={limit}"
+    
     headers = {
         'User-Agent': "okhttp/4.9.3",
         'Connection': "Keep-Alive",
@@ -121,6 +150,7 @@ def show_load():
     try:
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
+        # This will now return the decrypted list of matches
         data = parse_json_response(response)
     except Exception as e:
         print("API error:", e)
@@ -142,7 +172,6 @@ def show_load():
 
     return render_template("matches.html", matches=data, page=page)
 
-
 # ======================
 # LOGOUT
 # ======================
@@ -159,9 +188,5 @@ def logout():
     resp.delete_cookie("auth_token")
     return resp
 
-
-# ======================
-# MAIN ENTRY
-# ======================
 if __name__ == "__main__":
     app.run(debug=True)
