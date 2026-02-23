@@ -23,7 +23,8 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 app.secret_key = os.getenv("SECRET_KEY", "fallback_secret_key")
 
 # The secret key we extracted from the APK
-DECRYPTION_PASSWORD = "b7Q!eF9rL2#Z8xV6wT1@pC4dJ5hM0nR3"
+#DECRYPTION_PASSWORD = "b7Q!eF9rL2#Z8xV6wT1@pC4dJ5hM0nR3"
+DECRYPTION_PASSWORD = ""
 
 # ======================
 # HELPER FUNCTIONS
